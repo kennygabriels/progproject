@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.31.0/autocomplete.jquery.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+     <script>
+    $(document).ready(function(){
+      station_click();
+      $("#autocomplete").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $(".station-toggle").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });
+    </script>
+
+    <script>
+    function station_click() {
+        $(".station-name").click(function(event) {
+            event.preventDefault();
+            click_button = $(this).find("button").attr("name");
+            ajax_function(click_button);
+        });
+    }
+
+    function ajax_function(click_button) {
+        $.ajax({
+          url: "/reisplanner/" + click_button,
+        }).done(function(response) {
+            data = $(response).find(".col-md-10.station-list");
+            $(".station-data").html(data).promise().done(function() {
+                $(".station-name").unbind( "click" );
+                station_click();
+            });
+        });
+    }
+
+    $( document ).ajaxStart(function() {
+    $( "#loading" ).show();
+});
+
+    $( document ).ajaxStop(function() {
+    $( "#loading" ).hide();
+});
+
+    </script>
+
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Reisplanner</h1>
+        <input name="autocomplete" type="text" id="autocomplete" placeholder="Vul hier een station in" class="form-control input-lg"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 station-list">
+            {% for list1 in list1 %}
+            <div class="station-toggle">
+                <div class="station-name">
+                    <button id="station-click" name ='{{ list1.name }}'>{{ list1.name }}</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="station-data">
+         <div class="col-md-10 station-list">
+            <div class="col-md-3">
+                <h2>Ritnummer</h2>
+                {% for list2 in list2 %}
+                    <div class="vertrek-tijd">
+                        {{ list2.RitNummer }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-3">
+                <h2>Vertrektijd</h2>
+                {% for list2 in list2 %}
+                    <div class="vertrek-tijd">
+                        {{ list2.VertrekTijd[11:16] }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-3">
+                <h2>Eindbestemming</h2>
+                {% for list2 in list2 %}
+                    <div class="vertrek-tijd">
+                        {{ list2.EindBestemming }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-3">
+                <h2>Spoor</h2>
+                {% for list2 in list2 %}
+                    <div class="vertrek-tijd">
+                        {{ list2.VertrekSpoor["#text"] }}
+                    </div>
+                {% endfor %}
+            </div>
+         </div>
+        </div>
+    </div>
+</div>
+<div class="footer"></div>
+<div id="loading"></div>
+
+</body>
